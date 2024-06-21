@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}
+    <title>Produto</title>
+{% endblock %}
+{% block content %}
+
+<main>
+    <div id="title_and_button">
+        <h1 id = page_title>Lista de Produtos</h1>
+        <div class="image-container">
+            <button id="showFormButton">+</button>
+        </div>
+    </div>
+
+
+    <div id="rows">
+        <div id="customerFormContainer" class="customer-row" style="display: none;">
+            <form id="customerForm" action="{{ url_for('register_product') }}" method="post">
+                <input class ="forms" type="text" name="sku" placeholder="SKU" required>
+                <input class ="forms" type="text" name="name" placeholder="Nome" required>
+                <input class ="forms" type="text" name="description" placeholder="Descrição" required>
+                <input class ="forms" type="text" name="price" placeholder="Preço" required>
+                <input class ="forms" type="text" name="ean" placeholder="EAN" value = "">
+                <button type="submit" class="buttons_submit">Registar Produto</button>
+            </form>
+        </div>
+        
+        {% for product in products %}
+        <div class="customer-row">
+            <div>
+                <strong>SKU:</strong> {{ product.sku }}<br>
+                <strong>Nome:</strong> {{ product.name }}<br>
+                <strong>Preço:</strong> {{ product.price }}<br>
+                <strong>Descrição:</strong> {{ product.description}}
+            </div>
+            <div>
+                <a id="edit_button_{{product.sku}}" class="buttons_submit" onclick="showEditForm('{{product.sku}}')">Editar</a>
+                <a class="buttons_submit" href="{{ url_for('remove_product', sku=product.sku) }}">Remover</a>
+            </div>
+        </div>
+        <div id="editFormContainer_{{ product.sku }}" class="customer-row" style="display: none;">
+            <form id="customerForm_{{ product.sku }}" action="{{ url_for('edit_product', sku=product.sku)}}" method="post">
+                <input class ="forms" type="text" name="description" placeholder="Descrição" value="{{product.description}}" required>
+                <input class ="forms" type="text" name="price" placeholder="Preço" value="{{product.price}}" required>
+                <button type="submit" class="buttons_submit" href="{{ url_for('edit_product', sku=product.sku) }}">Editar Produto</button>
+            </form>
+        </div>
+        {% endfor %}
+
+        <!-- Pagination -->
+        <div id="pagination_controls">
+            {% if current_page > 1 %}
+                <a href="{{ url_for('products', page=current_page - 1) }}" class="pagination_controls"> << </a>
+            {% endif %}
+
+            Page {{ current_page }} of {{ total_pages }}
+
+            {% if current_page < total_pages %}
+                <a href="{{ url_for('products', page=current_page + 1) }}" class="pagination_controls"> >> </a>
+            {% endif %}
+        </div>
+    </div>
+</main>
+
+<script>
+    document.getElementById("showFormButton").addEventListener("click", function() {
+        var formContainer = document.getElementById("customerFormContainer");
+        if (formContainer.style.display === "block") {
+        formContainer.style.display = "none";
+        } else {
+            formContainer.style.display = "block";
+        }
+    });
+
+    function showEditForm(sku) {
+        var editFormContainer = document.getElementById('editFormContainer_' + sku);
+        if (editFormContainer.style.display === 'none') {
+            editFormContainer.style.display = 'block';
+        } else {
+            editFormContainer.style.display = 'none';
+        }
+    }
+
+
+</script>
+{% endblock %}

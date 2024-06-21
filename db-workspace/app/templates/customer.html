@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}
+    <title>Cliente</title>
+{% endblock %}
+{% block content %}
+
+<main>
+    <div id="title_and_button">
+        <h1 id = page_title>Lista de Clientes</h1>
+        <div class="image-container">
+            <button id="showFormButton">+</button>
+        </div>
+    </div>
+
+
+    <div id="rows">
+        <div id="customerFormContainer" class="customer-row" style="display: none;">
+            <form id="customerForm" action="{{ url_for('register_customer') }}" method="post">
+                <input class ="forms" type="text" name="name" placeholder="Nome" required>
+                <input class ="forms" type="email" name="email" placeholder="Email" required>
+                <input class ="forms" type="text" name="address" placeholder="Morada" required>
+                <input class ="forms" type="text" name="phone" placeholder="Telefone" required>
+                <button type="submit" class="buttons_submit">Registar Cliente</button>
+            </form>
+        </div>
+        {% for customer in customers %}
+            <div class="customer-row">
+                <div>
+                    <strong>Número de Cliente: {{ customer.cust_no }}</strong><br>
+                    <strong>Nome: {{ customer.name }}</strong><br>
+                    <strong>Email: {{ customer.email }}</strong>
+                </div>
+                <div>
+                    <a class = "buttons_submit" href="{{ url_for('remove_customer', customer_id=customer.cust_no) }}">Remover</a>
+                </div>
+            </div>
+        {% endfor %}
+
+        <!-- Pagination -->
+        <div id="pagination_controls">
+            {% if current_page > 1 %}
+                <a href="{{ url_for('customers', page=current_page - 1) }}" class="pagination_controls"> << </a>
+            {% endif %}
+
+            Page {{ current_page }} of {{ total_pages }}
+
+            {% if current_page < total_pages %}
+                <a href="{{ url_for('customers', page=current_page + 1) }}" class="pagination_controls"> >> </a>
+            {% endif %}
+        </div>
+    </div>
+</main>
+
+<script>
+    document.getElementById("showFormButton").addEventListener("click", function() {
+        var formContainer = document.getElementById("customerFormContainer");
+        if (formContainer.style.display === "block") {
+        formContainer.style.display = "none";
+        } else {
+            formContainer.style.display = "block";
+        }
+    });
+</script>
+{% endblock %}

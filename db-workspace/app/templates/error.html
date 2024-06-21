@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}<title>Erro</title>{% endblock %}
+{% block content %}
+  <div class="error-page">
+    <h1 class="page_title">An error occurred</h1>
+    <pre><code>{{ error }}</code></pre>
+    <a class="button buttons_submit" href="{{ url_for('home') }}">Main Menu</a>
+  </div>
+{% endblock %}

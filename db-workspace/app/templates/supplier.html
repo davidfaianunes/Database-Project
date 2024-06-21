@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}
+    <title>Fornecedor</title>
+{% endblock %}
+{% block content %}
+
+<main>
+    <div id="title_and_button">
+        <h1 id = page_title>Lista de Fornecedores</h1>
+        <div class="image-container">
+            <button id="showFormButton">+</button>
+        </div>
+    </div>
+
+
+    <div id="rows">
+        <div id="customerFormContainer" class="customer-row" style="display: none;">
+            <form id="customerForm" action="{{ url_for('register_supplier') }}" method="post">
+                <input class ="forms" type="text" name="tin" placeholder="NIF" required>
+                <input class ="forms" type="text" name="name" placeholder="Nome" required>
+                <input class ="forms" type="text" name="address" placeholder="Endereço" required>
+                <input class ="forms" type="text" name="sku" placeholder="SKU" required>
+                <input class ="forms" type="date" name="date" placeholder="Data" required>
+                <button type="submit" class="buttons_submit">Registar Fornecedor</button>
+            </form>
+        </div>
+        {% for supplier in suppliers %}
+            <div class="customer-row">
+                <div>
+                    <strong>NIF:</strong> {{ supplier.tin }}<br>
+                    <strong>Nome:</strong> {{ supplier.name }}<br>
+                    <strong>SKU:</strong> {{ supplier.sku }}
+                </div>
+                <div>
+                    <a class="buttons_submit" href="{{ url_for('remove_supplier', tin=supplier.tin) }}">Remover</a>
+                </div>
+            </div>
+        {% endfor %}
+
+        <!-- Pagination -->
+        <div id="pagination_controls">
+            {% if current_page > 1 %}
+                <a href="{{ url_for('suppliers', page=current_page - 1) }}" class="pagination_controls"> << </a>
+            {% endif %}
+
+            Page {{ current_page }} of {{ total_pages }}
+
+            {% if current_page < total_pages %}
+                <a href="{{ url_for('suppliers', page=current_page + 1) }}" class="pagination_controls"> >> </a>
+            {% endif %}
+        </div>
+    </div>
+</main>
+
+<script>
+    document.getElementById("showFormButton").addEventListener("click", function() {
+        var formContainer = document.getElementById("customerFormContainer");
+        if (formContainer.style.display === "block") {
+        formContainer.style.display = "none";
+        } else {
+            formContainer.style.display = "block";
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}
+    <title>Log-in</title>
+{% endblock %}
+{% block content %}
+
+<main>
+    <div id="title_and_button">
+        <h1 id = page_title>Escolhe um cliente para fazer log-in:</h1>
+    </div>
+    <div id="rows">
+        {% for customer in customers %}
+            <div class="customer-row">
+                <div>
+                    <strong>Número de Cliente:</strong> {{ customer.cust_no }}<br>
+                    <strong>Nome:</strong> {{ customer.name }}<br>
+                    <strong>Email:</strong> {{ customer.email }}
+                </div>
+                <div >
+                    <a class = "buttons_submit" href="{{ url_for('order', cust_no=customer.cust_no) }}">Login</a>
+                </div>
+            </div>
+        {% endfor %}
+
+    <!-- Pagination -->
+        <div id="pagination_controls">
+            {% if current_page > 1 %}
+                <a href="{{ url_for('login', page=current_page - 1) }}" class="pagination_controls"> << </a>
+            {% endif %}
+    
+            Page {{ current_page }} of {{ total_pages }}
+    
+            {% if current_page < total_pages %}
+                <a href="{{ url_for('login', page=current_page + 1) }}" class="pagination_controls"> >> </a>
+            {% endif %}
+        </div>
+    </div>
+</main>
+{% endblock %}

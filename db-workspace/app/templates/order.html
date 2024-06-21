@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}
+    <title>Encomendas</title>
+{% endblock %}
+{% block content %}
+<body>
+    <main>
+        <div id="title_and_button">
+            {% if customer_number is none %}
+            <h1 id="page_title">Encomendas</h1>
+            <a class="buttons_submit" href="{{ url_for('login') }}">Login</a>
+            {% else %}
+            <h1 id="page_title">Encomendas: Cliente {{ customer_number }}</h1>
+            <a class="buttons_submit" href="{{ url_for('orders') }}">Logout</a>
+            {% endif%}
+            <div class="image-container">
+                <button id="showFormButton">+</button>
+            </div>
+        </div>
+
+
+        <div id="rows">
+            <div>
+                <form id="orderForm" action="{{ url_for('register_order') }}" method="post" style="display:none;">
+                    <input type="hidden" name="numberProducts" id="number_of_products" value="1">
+                    <input class="forms" type="text" name="order_no" placeholder="Número de Encomenda" required>
+                    {% if customer_number is none %}
+                    <input class="forms" type="text" name="cust_no" placeholder="Número de Cliente" required>
+                    {% else %}
+                    <input class="forms" type="text" name="cust_no" value="{{ customer_number }}" readonly>
+                    {% endif %}
+                    <input class="forms" type="date" name="date" placeholder="Data" required>
+                    <div id="productPairsContainer">
+                        <div>
+                            <input class="forms" type="text" name="sku_1" placeholder="SKU" required>
+                            <input class="forms" type="number" name="qty_1" placeholder="Quantidade" required>
+                        </div>
+                    </div>
+                    <button class="buttons_submit" type="button" id="addPairButton" onclick="addProductPair()">Adicionar Produto</button>
+                    <button class="buttons_submit" type="button" id="removePairButton" onclick="removeProductPair()">Remover Produto</button>
+                    <button class="buttons_submit" href="{{ url_for('register_order') }}">Encomendar</button>
+                </form>
+            </div>
+
+            {% for i in range(orders | length) %}
+            <div class="customer-row">
+                <div>
+                    <strong>Encomenda:</strong> {{ orders[i].order_no }}<br>
+                    <strong>Preço:</strong> {{ total_price[i] }}<strong>€</strong><br>
+                    <strong>Quantidade de produtos:</strong> {{ num_products[i] }}<br>
+                    {% if customer_number is none %}
+                    <strong>Número de Cliente:</strong> {{ orders[i].cust_no }}<br>
+                    {% endif %}
+                </div>
+                <div>
+                    {% if customer_number is not none %}
+                        {% if orders[i].order_no in payed_orders %}
+                            <p style="color: #aed6b6; display: inline-block; margin: 5px 5px; padding: 10px; text-align: center;">Pago</p>
+                        {% else %}
+                            <a id="pay_button_{{orders[i].order_no}}" class="buttons_submit" onclick="showPaymentForm('{{orders[i].order_no}}')">Pagar</a>
+
+                            <form id="paymentForm_{{orders[i].order_no}}" action="{{ url_for('pay_order', order_no=orders[i].order_no) }}" method="post" style="display:none;">
+                                <h2>Payment Form</h2>
+                                <!-- A informação deste form não é usado para nada, serve só para simulação -->
+                                <label for="card-number">Número do cartão:</label>
+                                <input class="forms" type="text" id="card-number" name="card_number" required>
+                                <br>
+                                <label for="expiration-date">Data de validade:</label>
+                                <input class="forms" type="text" id="expiration-date" name="expiration_date" required>
+                                <br>
+                                <label for="cvv">CVV:</label>
+                                <input class="forms" type="text" id="cvv" name="cvv" required>
+                                <br>
+                                <button class="buttons_submit" type="submit">Pagar</button>
+                            </form>
+
+                        {% endif %}
+                        <a class="buttons_submit" href="{{ url_for('remove_order', order_no=orders[i].order_no) }}">Remover</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Pagination -->
+            <div id="pagination_controls">
+                {% if current_page > 1 %}
+                    {% if customer_number is not none %}
+                    <a href="{{ url_for('order', cust_no=customer_number, page=current_page - 1) }}" class="pagination_controls"> << </a>
+                    {% else %}
+                    <a href="{{ url_for('orders', page=current_page - 1) }}" class="pagination_controls"> << </a>
+                    {% endif %}
+                {% endif %}
+
+                Page {{ current_page }} of {{ total_pages }}
+
+                {% if current_page < total_pages %}
+                    {% if customer_number is not none %}
+                    <a href="{{ url_for('order', cust_no=customer_number, page=current_page + 1) }}" class="pagination_controls"> >> </a>
+                    {% else %}
+                    <a href="{{ url_for('orders', page=current_page + 1) }}" class="pagination_controls"> >> </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+
+    <script>
+        var pair_counter = 1;
+
+        function addProductPair() {
+            var container = document.getElementById("productPairsContainer");
+
+            pair_counter++;
+            var numberOfProducts = document.getElementById("number_of_products");
+            numberOfProducts.value = pair_counter;
+            
+            // Create the new SKU input
+            var skuInput = document.createElement("input");
+            skuInput.className = "forms";
+            skuInput.type = "text";
+            skuInput.name = "sku_" + pair_counter;
+            skuInput.placeholder = "SKU";
+            skuInput.required = true;
+
+            // Create the new Quantity input
+            var quantityInput = document.createElement("input");
+            quantityInput.className = "forms";
+            quantityInput.type = "number";
+            quantityInput.name = "qty_" + pair_counter;
+            quantityInput.placeholder = "Quantidade";
+            quantityInput.required = true;
+
+            // Create the new form-group div for the pair
+            var formGroup = document.createElement("div");
+            formGroup.className = "form-group";
+
+            // Append the inputs to the form-group div
+            formGroup.appendChild(skuInput);
+            formGroup.appendChild(quantityInput);
+
+            // Append the form-group div to the container
+            container.appendChild(formGroup);
+        }
+
+        function removeProductPair() {
+            var container = document.getElementById("productPairsContainer");
+
+            if (pair_counter > 1) {
+                container.removeChild(container.lastChild);
+                pair_counter--;
+            }
+
+            var numberOfProducts = document.getElementById("number_of_products");
+            numberOfProducts.value = pair_counter;
+        }
+
+        document.getElementById("showFormButton").addEventListener("click", function() {
+            var formContainer = document.getElementById("orderForm");
+            formContainer.style.display = formContainer.style.display === "none" ? "block" : "none";
+        });
+
+        function showPaymentForm(order_no) {
+            var editFormContainer = document.getElementById('paymentForm_' + order_no);
+            if (editFormContainer.style.display === 'none') {
+                editFormContainer.style.display = 'block';
+            } else {
+                editFormContainer.style.display = 'none';
+            }
+        }
+    </script>
+{% endblock %}
